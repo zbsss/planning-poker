@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+model UserProfile {
+  id      String   @id @default(uuid())
+  name    String
+  email   String?  @unique
+  image   String?
+  playing Player[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Player {
+  id String @id @default(uuid())
+
+  tableId String
+  table   Table  @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  userId      String
+  userProfile UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role PlayerRole
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  chosenCard String?
+
+  @@unique([tableId, userId])
+}
+
+enum PlayerRole {
+  PLAYER
+  ADMIN
+}
+
+model Table {
+  id String @id @default(uuid())
+
+  revealAt DateTime?
+
+  players Player[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

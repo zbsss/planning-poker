@@ -1,0 +1,17 @@
+query Table($tableId: String!) {
+  table(id: $tableId) {
+    id
+    revealAt
+    players {
+      id
+      chosenCard
+      role
+      userProfile {
+        id
+        name
+        email
+        image
+      }
+    }
+  }
+}
