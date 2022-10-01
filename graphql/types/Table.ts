@@ -1,5 +1,6 @@
 import { extendType, nonNull, objectType, stringArg } from 'nexus';
-import { emitPlayerReadinessEvent, Player } from './Player';
+import { Player } from './Player';
+import { emitPlayerReadinessEvent } from './PlayerReadiness';
 import { getUserOrThrow } from './UserProfile';
 
 export const Table = objectType({
@@ -23,7 +24,7 @@ export const Table = objectType({
   },
 });
 
-export const TableQuery = extendType({
+export const GetTable = extendType({
   type: 'Query',
   definition(t) {
     t.nonNull.field('table', {

@@ -18,7 +18,6 @@ const Tables = () => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>();
   const onSubmit: SubmitHandler<Inputs> = (data) =>
@@ -29,9 +28,7 @@ const Tables = () => {
   return (
     <div>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* include validation with required or other standard HTML validation rules */}
         <input {...register('name', { required: true })} />
-        {/* errors will return when field validation fails  */}
         {errors.name && <span>This field is required</span>}
 
         <input type="submit" />

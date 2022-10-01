@@ -1,14 +1,12 @@
-import { GetServerSideProps } from 'next';
+import { withPageAuthRequired } from '@auth0/nextjs-auth0';
 import React, { FC } from 'react';
 import {
   useTableQuery,
   useChooseCardMutation,
   useJoinTableMutation,
   usePlayerReadinessQuery,
-  PlayerReadinessDocument,
   PlayerReadinessUpdatesDocument,
 } from '../../generated/graphql';
-import { PlayerReadinessUpdates } from '../../graphql/types';
 
 interface TableProps {
   tableId: string;
@@ -116,16 +114,18 @@ const Table: FC<TableProps> = ({ tableId }) => {
 
 export default Table;
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const tableId = context.query.tableId;
+export const getServerSideProps = withPageAuthRequired({
+  getServerSideProps: async (context) => {
+    const tableId = context.query.tableId;
 
-  if (!tableId || typeof tableId !== 'string') {
+    if (!tableId || typeof tableId !== 'string') {
+      return {
+        notFound: true,
+      };
+    }
+
     return {
-      notFound: true,
+      props: { tableId }, // will be passed to the page component as props
     };
-  }
-
-  return {
-    props: { tableId }, // will be passed to the page component as props
-  };
-};
+  },
+});

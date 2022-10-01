@@ -4,11 +4,13 @@ import { ApolloProvider } from '@apollo/client';
 import apolloClient from '../lib/apollo';
 import { UserProvider } from '@auth0/nextjs-auth0';
 import Header from '../components/Layout/Header';
+import RegisterMe from '../components/Me';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <UserProvider>
       <ApolloProvider client={apolloClient}>
+        <RegisterMe />
         <Header />
         <Component {...pageProps} />
       </ApolloProvider>
