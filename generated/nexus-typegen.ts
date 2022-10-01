@@ -42,14 +42,25 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
+  Card: { // root type
+    chosenCard?: string | null; // String
+  }
+  Mutation: {};
   Player: { // root type
     chosenCard?: string | null; // String
-    id: string; // String!
     role: NexusGenEnums['PlayerRole']; // PlayerRole!
+    tableId: string; // String!
+    userId: string; // String!
   }
   Query: {};
+  Readiness: { // root type
+    isReady: boolean; // Boolean!
+    userId: string; // String!
+  }
+  Subscription: {};
   Table: { // root type
     id: string; // String!
+    name: string; // String!
     revealAt?: string | null; // String
   }
   UserProfile: { // root type
@@ -71,17 +82,37 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars & NexusGenEnums
 
 export interface NexusGenFieldTypes {
+  Card: { // field return type
+    chosenCard: string | null; // String
+  }
+  Mutation: { // field return type
+    chooseCard: NexusGenRootTypes['Card']; // Card!
+    createTable: NexusGenRootTypes['Table']; // Table!
+    joinTable: NexusGenRootTypes['Player']; // Player!
+    registerUser: NexusGenRootTypes['UserProfile']; // UserProfile!
+  }
   Player: { // field return type
     chosenCard: string | null; // String
-    id: string; // String!
     role: NexusGenEnums['PlayerRole']; // PlayerRole!
+    tableId: string; // String!
+    userId: string; // String!
     userProfile: NexusGenRootTypes['UserProfile']; // UserProfile!
   }
   Query: { // field return type
+    playerReadiness: NexusGenRootTypes['Readiness'][]; // [Readiness!]!
     table: NexusGenRootTypes['Table']; // Table!
+    tables: NexusGenRootTypes['Table'][]; // [Table!]!
+  }
+  Readiness: { // field return type
+    isReady: boolean; // Boolean!
+    userId: string; // String!
+  }
+  Subscription: { // field return type
+    playerReadiness: NexusGenRootTypes['Readiness'][]; // [Readiness!]!
   }
   Table: { // field return type
     id: string; // String!
+    name: string; // String!
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     revealAt: string | null; // String
   }
@@ -94,17 +125,37 @@ export interface NexusGenFieldTypes {
 }
 
 export interface NexusGenFieldTypeNames {
+  Card: { // field return type name
+    chosenCard: 'String'
+  }
+  Mutation: { // field return type name
+    chooseCard: 'Card'
+    createTable: 'Table'
+    joinTable: 'Player'
+    registerUser: 'UserProfile'
+  }
   Player: { // field return type name
     chosenCard: 'String'
-    id: 'String'
     role: 'PlayerRole'
+    tableId: 'String'
+    userId: 'String'
     userProfile: 'UserProfile'
   }
   Query: { // field return type name
+    playerReadiness: 'Readiness'
     table: 'Table'
+    tables: 'Table'
+  }
+  Readiness: { // field return type name
+    isReady: 'Boolean'
+    userId: 'String'
+  }
+  Subscription: { // field return type name
+    playerReadiness: 'Readiness'
   }
   Table: { // field return type name
     id: 'String'
+    name: 'String'
     players: 'Player'
     revealAt: 'String'
   }
@@ -117,9 +168,29 @@ export interface NexusGenFieldTypeNames {
 }
 
 export interface NexusGenArgTypes {
+  Mutation: {
+    chooseCard: { // args
+      card?: string | null; // String
+      tableId: string; // String!
+    }
+    createTable: { // args
+      name: string; // String!
+    }
+    joinTable: { // args
+      tableId: string; // String!
+    }
+  }
   Query: {
+    playerReadiness: { // args
+      tableId: string; // String!
+    }
     table: { // args
       id: string; // String!
+    }
+  }
+  Subscription: {
+    playerReadiness: { // args
+      tableId: string; // String!
     }
   }
 }

@@ -15,7 +15,7 @@ datasource db {
 model UserProfile {
   id      String   @id @default(uuid())
   name    String
-  email   String?  @unique
+  email   String   @unique
   image   String?
   playing Player[]
 
@@ -24,7 +24,7 @@ model UserProfile {
 }
 
 model Player {
-  id String @id @default(uuid())
+  // id String @id @default(uuid())
 
   tableId String
   table   Table  @relation(fields: [tableId], references: [id], onDelete: Cascade)
@@ -32,14 +32,14 @@ model Player {
   userId      String
   userProfile UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  role PlayerRole
+  role PlayerRole @default(PLAYER)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   chosenCard String?
 
-  @@unique([tableId, userId])
+  @@id([tableId, userId])
 }
 
 enum PlayerRole {
@@ -49,6 +49,8 @@ enum PlayerRole {
 
 model Table {
   id String @id @default(uuid())
+
+  name String
 
   revealAt DateTime?
 

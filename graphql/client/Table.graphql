@@ -1,9 +1,9 @@
 query Table($tableId: String!) {
   table(id: $tableId) {
     id
+    name
     revealAt
     players {
-      id
       chosenCard
       role
       userProfile {
@@ -13,5 +13,71 @@ query Table($tableId: String!) {
         image
       }
     }
+  }
+}
+
+query MyTables {
+  tables {
+    id
+    name
+    players {
+      role
+      userProfile {
+        name
+        email
+        image
+      }
+    }
+  }
+}
+
+mutation CreateTable($name: String!) {
+  createTable(name: $name) {
+    id
+    name
+    players {
+      role
+      userProfile {
+        id
+        name
+        image
+        email
+      }
+    }
+  }
+}
+
+mutation JoinTable($tableId: String!) {
+  joinTable(tableId: $tableId) {
+    role
+  }
+}
+
+mutation ChooseCard($tableId: String!, $card: String) {
+  chooseCard(tableId: $tableId, card: $card) {
+    chosenCard
+  }
+}
+
+mutation RegisterUser {
+  registerUser {
+    id
+    name
+    email
+    image
+  }
+}
+
+query PlayerReadiness($tableId: String!) {
+  playerReadiness(tableId: $tableId) {
+    userId
+    isReady
+  }
+}
+
+subscription PlayerReadinessUpdates($tableId: String!) {
+  playerReadiness(tableId: $tableId) {
+    userId
+    isReady
   }
 }

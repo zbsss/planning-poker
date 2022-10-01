@@ -1,5 +1,4 @@
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
 
 export default function Home() {
   return (
@@ -8,6 +7,8 @@ export default function Home() {
         <title>Next.js Template</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
+      <div></div>
     </div>
   );
 }

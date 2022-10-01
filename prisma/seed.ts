@@ -11,10 +11,12 @@ async function main() {
       {
         id: 'U_1',
         name: 'John',
+        email: 'john@gmail.com',
       },
       {
         id: 'U_2',
         name: 'Bob',
+        email: 'bob@gmail.com',
       },
     ],
   });
@@ -22,6 +24,7 @@ async function main() {
   await prisma.table.create({
     data: {
       id: 'T_1',
+      name: 'First Table',
       players: {
         create: [
           { userId: 'U_1', role: 'ADMIN' },

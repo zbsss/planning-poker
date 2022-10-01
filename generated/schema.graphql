@@ -2,10 +2,22 @@
 ### Do not make changes to this file directly
 
 
+type Card {
+  chosenCard: String
+}
+
+type Mutation {
+  chooseCard(card: String, tableId: String!): Card!
+  createTable(name: String!): Table!
+  joinTable(tableId: String!): Player!
+  registerUser: UserProfile!
+}
+
 type Player {
   chosenCard: String
-  id: String!
   role: PlayerRole!
+  tableId: String!
+  userId: String!
   userProfile: UserProfile!
 }
 
@@ -15,11 +27,23 @@ enum PlayerRole {
 }
 
 type Query {
+  playerReadiness(tableId: String!): [Readiness!]!
   table(id: String!): Table!
+  tables: [Table!]!
+}
+
+type Readiness {
+  isReady: Boolean!
+  userId: String!
+}
+
+type Subscription {
+  playerReadiness(tableId: String!): [Readiness!]!
 }
 
 type Table {
   id: String!
+  name: String!
   players: [Player!]!
   revealAt: String
 }
