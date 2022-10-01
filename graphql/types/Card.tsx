@@ -55,8 +55,8 @@ export const PickCard = extendType({
         ) {
           emitPlayerReadinessEvent(ctx, args.tableId, {
             data: {
-              userId: user.id,
               isReady: !!args.card,
+              user,
             },
           });
         }

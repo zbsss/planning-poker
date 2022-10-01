@@ -55,7 +55,7 @@ export interface NexusGenObjects {
   Query: {};
   Readiness: { // root type
     isReady: boolean; // Boolean!
-    userId: string; // String!
+    user: NexusGenRootTypes['UserProfile']; // UserProfile!
   }
   Subscription: {};
   Table: { // root type
@@ -64,7 +64,7 @@ export interface NexusGenObjects {
     revealAt?: string | null; // String
   }
   UserProfile: { // root type
-    email?: string | null; // String
+    email: string; // String!
     id: string; // String!
     image?: string | null; // String
     name: string; // String!
@@ -105,7 +105,7 @@ export interface NexusGenFieldTypes {
   }
   Readiness: { // field return type
     isReady: boolean; // Boolean!
-    userId: string; // String!
+    user: NexusGenRootTypes['UserProfile']; // UserProfile!
   }
   Subscription: { // field return type
     playerReadiness: NexusGenRootTypes['Readiness'][]; // [Readiness!]!
@@ -117,7 +117,7 @@ export interface NexusGenFieldTypes {
     revealAt: string | null; // String
   }
   UserProfile: { // field return type
-    email: string | null; // String
+    email: string; // String!
     id: string; // String!
     image: string | null; // String
     name: string; // String!
@@ -148,7 +148,7 @@ export interface NexusGenFieldTypeNames {
   }
   Readiness: { // field return type name
     isReady: 'Boolean'
-    userId: 'String'
+    user: 'UserProfile'
   }
   Subscription: { // field return type name
     playerReadiness: 'Readiness'

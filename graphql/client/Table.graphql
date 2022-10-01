@@ -3,16 +3,6 @@ query Table($tableId: String!) {
     id
     name
     revealAt
-    players {
-      chosenCard
-      role
-      userProfile {
-        id
-        name
-        email
-        image
-      }
-    }
   }
 }
 
@@ -70,14 +60,24 @@ mutation RegisterUser {
 
 query PlayerReadiness($tableId: String!) {
   playerReadiness(tableId: $tableId) {
-    userId
     isReady
+    user {
+      id
+      name
+      email
+      image
+    }
   }
 }
 
 subscription PlayerReadinessUpdates($tableId: String!) {
   playerReadiness(tableId: $tableId) {
-    userId
     isReady
+    user {
+      id
+      name
+      email
+      image
+    }
   }
 }

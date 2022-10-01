@@ -7,7 +7,7 @@ export const UserProfile = objectType({
   definition(t) {
     t.nonNull.string('id');
     t.nonNull.string('name');
-    t.string('email');
+    t.nonNull.string('email');
     t.string('image');
   },
 });

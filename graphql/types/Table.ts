@@ -73,8 +73,8 @@ export const JoinTable = extendType({
 
         emitPlayerReadinessEvent(ctx, args.tableId, {
           data: {
-            userId: user.id,
             isReady: false,
+            user,
           },
         });
 

@@ -35,8 +35,24 @@ Open [Apollo Studio](https://studio.apollographql.com/sandbox/explorer) to explo
 
 `prisma db push` - Push the Prisma schema state to the database
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## TODOs
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### Revealing cards
+
+- protect `chosenCard` information before `revealAt` has elapsed
+- when everyone is in ready status display the "Reveal cards" button
+- when pressed send a mutation that changes `revealAt` of the table
+- each player has a subscription waiting for changes of `revealAt`
+- when `revealAt` is withing 5s in the future display a countdown (disable users from removing their vote, but they can still change it)
+- when the timer runs out block users from changing their votes and make a query to download votes of all the other players
+
+### Other
+
+- what if a new player joins the room?
+  - we need to send all of user's data through subscriptions (this way if new user joins they will be automatically displayed on the table)
+- update cache after mutation
+- better error handling in graphql API
+- better UI
+- inviting players via a link that has a expiry date

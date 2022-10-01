@@ -1,19 +1,22 @@
 import { objectType, extendType, nonNull, stringArg } from 'nexus';
-import { requireUserLoggedIn } from './UserProfile';
+import { requireUserLoggedIn, UserProfile } from './UserProfile';
 import { Event } from '../../lib/pubsub';
 import { Context } from '../context';
+import { UserProfile as User } from '@prisma/client';
 
 export const Readiness = objectType({
   name: 'Readiness',
   definition(t) {
-    t.nonNull.string('userId');
     t.nonNull.boolean('isReady');
+    t.nonNull.field('user', {
+      type: UserProfile,
+    });
   },
 });
 
 interface Readiness {
-  userId: string;
   isReady: boolean;
+  user: User;
 }
 
 export const playerReadinessTopic = (tableId: string) =>
@@ -41,14 +44,14 @@ export const PlayerReadiness = extendType({
         const players = await ctx.prisma.player.findMany({
           where: { tableId: args.tableId },
           select: {
-            userId: true,
+            userProfile: true,
             chosenCard: true,
           },
         });
 
         return players.map((player) => ({
-          userId: player.userId,
           isReady: !!player.chosenCard,
+          user: player.userProfile,
         }));
       },
     });

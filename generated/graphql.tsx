@@ -78,7 +78,7 @@ export type QueryTableArgs = {
 export type Readiness = {
   __typename?: 'Readiness';
   isReady: Scalars['Boolean'];
-  userId: Scalars['String'];
+  user: UserProfile;
 };
 
 export type Subscription = {
@@ -101,7 +101,7 @@ export type Table = {
 
 export type UserProfile = {
   __typename?: 'UserProfile';
-  email?: Maybe<Scalars['String']>;
+  email: Scalars['String'];
   id: Scalars['String'];
   image?: Maybe<Scalars['String']>;
   name: Scalars['String'];
@@ -112,19 +112,19 @@ export type TableQueryVariables = Exact<{
 }>;
 
 
-export type TableQuery = { __typename?: 'Query', table: { __typename?: 'Table', id: string, name: string, revealAt?: string | null, players: Array<{ __typename?: 'Player', chosenCard?: string | null, role: PlayerRole, userProfile: { __typename?: 'UserProfile', id: string, name: string, email?: string | null, image?: string | null } }> } };
+export type TableQuery = { __typename?: 'Query', table: { __typename?: 'Table', id: string, name: string, revealAt?: string | null } };
 
 export type MyTablesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MyTablesQuery = { __typename?: 'Query', tables: Array<{ __typename?: 'Table', id: string, name: string, players: Array<{ __typename?: 'Player', role: PlayerRole, userProfile: { __typename?: 'UserProfile', name: string, email?: string | null, image?: string | null } }> }> };
+export type MyTablesQuery = { __typename?: 'Query', tables: Array<{ __typename?: 'Table', id: string, name: string, players: Array<{ __typename?: 'Player', role: PlayerRole, userProfile: { __typename?: 'UserProfile', name: string, email: string, image?: string | null } }> }> };
 
 export type CreateTableMutationVariables = Exact<{
   name: Scalars['String'];
 }>;
 
 
-export type CreateTableMutation = { __typename?: 'Mutation', createTable: { __typename?: 'Table', id: string, name: string, players: Array<{ __typename?: 'Player', role: PlayerRole, userProfile: { __typename?: 'UserProfile', id: string, name: string, image?: string | null, email?: string | null } }> } };
+export type CreateTableMutation = { __typename?: 'Mutation', createTable: { __typename?: 'Table', id: string, name: string, players: Array<{ __typename?: 'Player', role: PlayerRole, userProfile: { __typename?: 'UserProfile', id: string, name: string, image?: string | null, email: string } }> } };
 
 export type JoinTableMutationVariables = Exact<{
   tableId: Scalars['String'];
@@ -144,21 +144,21 @@ export type ChooseCardMutation = { __typename?: 'Mutation', chooseCard: { __type
 export type RegisterUserMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type RegisterUserMutation = { __typename?: 'Mutation', registerUser: { __typename?: 'UserProfile', id: string, name: string, email?: string | null, image?: string | null } };
+export type RegisterUserMutation = { __typename?: 'Mutation', registerUser: { __typename?: 'UserProfile', id: string, name: string, email: string, image?: string | null } };
 
 export type PlayerReadinessQueryVariables = Exact<{
   tableId: Scalars['String'];
 }>;
 
 
-export type PlayerReadinessQuery = { __typename?: 'Query', playerReadiness: Array<{ __typename?: 'Readiness', userId: string, isReady: boolean }> };
+export type PlayerReadinessQuery = { __typename?: 'Query', playerReadiness: Array<{ __typename?: 'Readiness', isReady: boolean, user: { __typename?: 'UserProfile', id: string, name: string, email: string, image?: string | null } }> };
 
 export type PlayerReadinessUpdatesSubscriptionVariables = Exact<{
   tableId: Scalars['String'];
 }>;
 
 
-export type PlayerReadinessUpdatesSubscription = { __typename?: 'Subscription', playerReadiness: Array<{ __typename?: 'Readiness', userId: string, isReady: boolean }> };
+export type PlayerReadinessUpdatesSubscription = { __typename?: 'Subscription', playerReadiness: Array<{ __typename?: 'Readiness', isReady: boolean, user: { __typename?: 'UserProfile', id: string, name: string, email: string, image?: string | null } }> };
 
 
 export const TableDocument = gql`
@@ -167,16 +167,6 @@ export const TableDocument = gql`
     id
     name
     revealAt
-    players {
-      chosenCard
-      role
-      userProfile {
-        id
-        name
-        email
-        image
-      }
-    }
   }
 }
     `;
@@ -399,8 +389,13 @@ export type RegisterUserMutationOptions = Apollo.BaseMutationOptions<RegisterUse
 export const PlayerReadinessDocument = gql`
     query PlayerReadiness($tableId: String!) {
   playerReadiness(tableId: $tableId) {
-    userId
     isReady
+    user {
+      id
+      name
+      email
+      image
+    }
   }
 }
     `;
@@ -435,8 +430,13 @@ export type PlayerReadinessQueryResult = Apollo.QueryResult<PlayerReadinessQuery
 export const PlayerReadinessUpdatesDocument = gql`
     subscription PlayerReadinessUpdates($tableId: String!) {
   playerReadiness(tableId: $tableId) {
-    userId
     isReady
+    user {
+      id
+      name
+      email
+      image
+    }
   }
 }
     `;
