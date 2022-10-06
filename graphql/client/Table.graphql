@@ -36,9 +36,9 @@ mutation CreateTable($name: String!) {
   }
 }
 
-mutation JoinTable($tableId: String!) {
-  joinTable(tableId: $tableId) {
-    role
+mutation JoinTable($token: String!) {
+  joinTable(token: $token) {
+    url
   }
 }
 
@@ -92,5 +92,11 @@ subscription PlayerReadinessUpdates($tableId: String!) {
       email
       image
     }
+  }
+}
+
+query ShareUrl($tableId: String!) {
+  share(tableId: $tableId) {
+    url
   }
 }

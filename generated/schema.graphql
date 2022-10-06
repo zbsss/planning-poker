@@ -10,7 +10,7 @@ type Mutation {
   chooseCard(card: String, tableId: String!): Card!
   createTable(name: String!): Table!
   hideCards(tableId: String!): Table!
-  joinTable(tableId: String!): Player!
+  joinTable(token: String!): Url!
   registerUser: UserProfile!
   revealCards(tableId: String!): Table!
 }
@@ -30,6 +30,7 @@ enum PlayerRole {
 
 type Query {
   playerReadiness(tableId: String!): [Readiness!]!
+  share(tableId: String!): Url!
   table(id: String!): Table!
   tables: [Table!]!
 }
@@ -49,6 +50,10 @@ type Table {
   name: String!
   players: [Player!]!
   revealAt: String
+}
+
+type Url {
+  url: String!
 }
 
 type UserProfile {

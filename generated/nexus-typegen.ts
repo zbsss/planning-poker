@@ -64,6 +64,9 @@ export interface NexusGenObjects {
     name: string; // String!
     revealAt?: string | null; // String
   }
+  Url: { // root type
+    url: string; // String!
+  }
   UserProfile: { // root type
     email: string; // String!
     id: string; // String!
@@ -90,7 +93,7 @@ export interface NexusGenFieldTypes {
     chooseCard: NexusGenRootTypes['Card']; // Card!
     createTable: NexusGenRootTypes['Table']; // Table!
     hideCards: NexusGenRootTypes['Table']; // Table!
-    joinTable: NexusGenRootTypes['Player']; // Player!
+    joinTable: NexusGenRootTypes['Url']; // Url!
     registerUser: NexusGenRootTypes['UserProfile']; // UserProfile!
     revealCards: NexusGenRootTypes['Table']; // Table!
   }
@@ -103,6 +106,7 @@ export interface NexusGenFieldTypes {
   }
   Query: { // field return type
     playerReadiness: NexusGenRootTypes['Readiness'][]; // [Readiness!]!
+    share: NexusGenRootTypes['Url']; // Url!
     table: NexusGenRootTypes['Table']; // Table!
     tables: NexusGenRootTypes['Table'][]; // [Table!]!
   }
@@ -120,6 +124,9 @@ export interface NexusGenFieldTypes {
     players: NexusGenRootTypes['Player'][]; // [Player!]!
     revealAt: string | null; // String
   }
+  Url: { // field return type
+    url: string; // String!
+  }
   UserProfile: { // field return type
     email: string; // String!
     id: string; // String!
@@ -136,7 +143,7 @@ export interface NexusGenFieldTypeNames {
     chooseCard: 'Card'
     createTable: 'Table'
     hideCards: 'Table'
-    joinTable: 'Player'
+    joinTable: 'Url'
     registerUser: 'UserProfile'
     revealCards: 'Table'
   }
@@ -149,6 +156,7 @@ export interface NexusGenFieldTypeNames {
   }
   Query: { // field return type name
     playerReadiness: 'Readiness'
+    share: 'Url'
     table: 'Table'
     tables: 'Table'
   }
@@ -165,6 +173,9 @@ export interface NexusGenFieldTypeNames {
     name: 'String'
     players: 'Player'
     revealAt: 'String'
+  }
+  Url: { // field return type name
+    url: 'String'
   }
   UserProfile: { // field return type name
     email: 'String'
@@ -187,7 +198,7 @@ export interface NexusGenArgTypes {
       tableId: string; // String!
     }
     joinTable: { // args
-      tableId: string; // String!
+      token: string; // String!
     }
     revealCards: { // args
       tableId: string; // String!
@@ -195,6 +206,9 @@ export interface NexusGenArgTypes {
   }
   Query: {
     playerReadiness: { // args
+      tableId: string; // String!
+    }
+    share: { // args
       tableId: string; // String!
     }
     table: { // args

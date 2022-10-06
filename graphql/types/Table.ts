@@ -1,9 +1,10 @@
-import { Table as TableSchema, UserProfile } from '@prisma/client';
+import { Table as TableSchema } from '@prisma/client';
 import { extendType, nonNull, objectType, stringArg } from 'nexus';
 import { Context } from '../context';
 import { Player } from './Player';
 import { emitPlayerReadinessEvent } from './PlayerReadiness';
 import { getUserOrThrow } from './UserProfile';
+import jsonwebtoken from 'jsonwebtoken';
 
 export const Table = objectType({
   name: 'Table',
@@ -31,10 +32,7 @@ const translateTable = (table: TableSchema) => ({
   revealAt: table.revealAt?.toISOString(),
 });
 
-export const requireUserAtTable = async (
-  ctx: Context,
-  tableId: string
-): Promise<[UserProfile, TableSchema]> => {
+export const requireUserAtTable = async (ctx: Context, tableId: string) => {
   const user = await getUserOrThrow(ctx);
 
   const [table] = await ctx.prisma.table.findMany({
@@ -46,13 +44,16 @@ export const requireUserAtTable = async (
         },
       },
     },
+    include: {
+      players: { where: { userId: user.id } },
+    },
   });
 
   if (!table) {
     throw new Error('Table does not exist or you are not allowed to see it');
   }
 
-  return [user, table];
+  return { user, table, role: table.players[0].role };
 };
 
 export const GetTable = extendType({
@@ -64,59 +65,94 @@ export const GetTable = extendType({
         id: nonNull(stringArg()),
       },
       resolve: async (_parent, args, ctx) => {
-        // TODO: uncomment line once we have invite URLs
-        // const table = await requireUserAtTable(ctx, args.id);
-
-        const table = await ctx.prisma.table.findUnique({
-          where: { id: args.id },
-        });
-
-        if (!table) {
-          throw new Error('Table missing');
-        }
-
+        const { table } = await requireUserAtTable(ctx, args.id);
         return translateTable(table);
       },
     });
   },
 });
 
-export const ShareTable = extendType({
-  type: 'Query',
-  definition(t) {},
+const Url = objectType({
+  name: 'Url',
+  definition(t) {
+    t.nonNull.string('url');
+  },
 });
 
-/**
- * TODO: create shareable URLs that contain a token and expire after set time
- */
+export const ShareTable = extendType({
+  type: 'Query',
+  definition(t) {
+    t.nonNull.field('share', {
+      type: Url,
+      args: {
+        tableId: nonNull(stringArg()),
+      },
+      resolve: async (parent, args, ctx) => {
+        const { role } = await requireUserAtTable(ctx, args.tableId);
+
+        if (role !== 'ADMIN') {
+          throw new Error(`You don't have permission to share this table`);
+        }
+
+        const token = jsonwebtoken.sign(
+          {
+            tableId: args.tableId,
+          },
+          process.env.SECRET || 'secret',
+          {
+            expiresIn: '24 h',
+          }
+        );
+
+        return { url: `http://localhost:3000/share?token=${token}` };
+      },
+    });
+  },
+});
+
 export const JoinTable = extendType({
   type: 'Mutation',
   definition(t) {
     t.nonNull.field('joinTable', {
-      type: Player,
+      type: Url,
       args: {
-        tableId: nonNull(stringArg()),
+        token: nonNull(stringArg()),
       },
       resolve: async (_parent, args, ctx) => {
         const user = await getUserOrThrow(ctx);
 
-        const player = ctx.prisma.player.create({
-          data: {
-            userId: user.id,
-            tableId: args.tableId,
-          },
-        });
+        const token = jsonwebtoken.verify(
+          args.token,
+          process.env.SECRET || 'secret'
+        );
 
-        emitPlayerReadinessEvent(ctx, args.tableId, {
-          data: [
-            {
-              isReady: false,
-              user,
+        const tableId = (token as any).tableId as string;
+
+        if (!tableId) {
+          throw new Error('Invalid token');
+        }
+
+        try {
+          await ctx.prisma.player.create({
+            data: {
+              userId: user.id,
+              tableId: tableId,
             },
-          ],
-        });
+          });
 
-        return player;
+          await emitPlayerReadinessEvent(ctx, tableId, {
+            data: [
+              {
+                isReady: false,
+                user,
+              },
+            ],
+          });
+        } catch (err) {
+          console.log('Already joined this table');
+        }
+
+        return { url: `http://localhost:3000/tables/${tableId}` };
       },
     });
   },
@@ -187,7 +223,7 @@ export const RevealCards = extendType({
         tableId: nonNull(stringArg()),
       },
       resolve: async (_parent, args, ctx) => {
-        const [, table] = await requireUserAtTable(ctx, args.tableId);
+        const { table } = await requireUserAtTable(ctx, args.tableId);
 
         if (table.revealAt) {
           throw new Error(
