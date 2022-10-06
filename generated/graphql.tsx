@@ -24,8 +24,10 @@ export type Mutation = {
   __typename?: 'Mutation';
   chooseCard: Card;
   createTable: Table;
+  hideCards: Table;
   joinTable: Player;
   registerUser: UserProfile;
+  revealCards: Table;
 };
 
 
@@ -40,7 +42,17 @@ export type MutationCreateTableArgs = {
 };
 
 
+export type MutationHideCardsArgs = {
+  tableId: Scalars['String'];
+};
+
+
 export type MutationJoinTableArgs = {
+  tableId: Scalars['String'];
+};
+
+
+export type MutationRevealCardsArgs = {
   tableId: Scalars['String'];
 };
 
@@ -77,6 +89,7 @@ export type QueryTableArgs = {
 
 export type Readiness = {
   __typename?: 'Readiness';
+  chosenCard?: Maybe<Scalars['String']>;
   isReady: Scalars['Boolean'];
   user: UserProfile;
 };
@@ -124,7 +137,7 @@ export type CreateTableMutationVariables = Exact<{
 }>;
 
 
-export type CreateTableMutation = { __typename?: 'Mutation', createTable: { __typename?: 'Table', id: string, name: string, players: Array<{ __typename?: 'Player', role: PlayerRole, userProfile: { __typename?: 'UserProfile', id: string, name: string, image?: string | null, email: string } }> } };
+export type CreateTableMutation = { __typename?: 'Mutation', createTable: { __typename?: 'Table', id: string, name: string, players: Array<{ __typename?: 'Player', role: PlayerRole, userProfile: { __typename?: 'UserProfile', name: string, image?: string | null, email: string } }> } };
 
 export type JoinTableMutationVariables = Exact<{
   tableId: Scalars['String'];
@@ -141,6 +154,20 @@ export type ChooseCardMutationVariables = Exact<{
 
 export type ChooseCardMutation = { __typename?: 'Mutation', chooseCard: { __typename?: 'Card', chosenCard?: string | null } };
 
+export type RevealCardsMutationVariables = Exact<{
+  tableId: Scalars['String'];
+}>;
+
+
+export type RevealCardsMutation = { __typename?: 'Mutation', revealCards: { __typename?: 'Table', revealAt?: string | null } };
+
+export type HideCardsMutationVariables = Exact<{
+  tableId: Scalars['String'];
+}>;
+
+
+export type HideCardsMutation = { __typename?: 'Mutation', hideCards: { __typename?: 'Table', revealAt?: string | null } };
+
 export type RegisterUserMutationVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -151,14 +178,14 @@ export type PlayerReadinessQueryVariables = Exact<{
 }>;
 
 
-export type PlayerReadinessQuery = { __typename?: 'Query', playerReadiness: Array<{ __typename?: 'Readiness', isReady: boolean, user: { __typename?: 'UserProfile', id: string, name: string, email: string, image?: string | null } }> };
+export type PlayerReadinessQuery = { __typename?: 'Query', playerReadiness: Array<{ __typename?: 'Readiness', isReady: boolean, chosenCard?: string | null, user: { __typename?: 'UserProfile', id: string, name: string, email: string, image?: string | null } }> };
 
 export type PlayerReadinessUpdatesSubscriptionVariables = Exact<{
   tableId: Scalars['String'];
 }>;
 
 
-export type PlayerReadinessUpdatesSubscription = { __typename?: 'Subscription', playerReadiness: Array<{ __typename?: 'Readiness', isReady: boolean, user: { __typename?: 'UserProfile', id: string, name: string, email: string, image?: string | null } }> };
+export type PlayerReadinessUpdatesSubscription = { __typename?: 'Subscription', playerReadiness: Array<{ __typename?: 'Readiness', isReady: boolean, chosenCard?: string | null, user: { __typename?: 'UserProfile', id: string, name: string, email: string, image?: string | null } }> };
 
 
 export const TableDocument = gql`
@@ -249,7 +276,6 @@ export const CreateTableDocument = gql`
     players {
       role
       userProfile {
-        id
         name
         image
         email
@@ -351,6 +377,72 @@ export function useChooseCardMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type ChooseCardMutationHookResult = ReturnType<typeof useChooseCardMutation>;
 export type ChooseCardMutationResult = Apollo.MutationResult<ChooseCardMutation>;
 export type ChooseCardMutationOptions = Apollo.BaseMutationOptions<ChooseCardMutation, ChooseCardMutationVariables>;
+export const RevealCardsDocument = gql`
+    mutation RevealCards($tableId: String!) {
+  revealCards(tableId: $tableId) {
+    revealAt
+  }
+}
+    `;
+export type RevealCardsMutationFn = Apollo.MutationFunction<RevealCardsMutation, RevealCardsMutationVariables>;
+
+/**
+ * __useRevealCardsMutation__
+ *
+ * To run a mutation, you first call `useRevealCardsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRevealCardsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [revealCardsMutation, { data, loading, error }] = useRevealCardsMutation({
+ *   variables: {
+ *      tableId: // value for 'tableId'
+ *   },
+ * });
+ */
+export function useRevealCardsMutation(baseOptions?: Apollo.MutationHookOptions<RevealCardsMutation, RevealCardsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RevealCardsMutation, RevealCardsMutationVariables>(RevealCardsDocument, options);
+      }
+export type RevealCardsMutationHookResult = ReturnType<typeof useRevealCardsMutation>;
+export type RevealCardsMutationResult = Apollo.MutationResult<RevealCardsMutation>;
+export type RevealCardsMutationOptions = Apollo.BaseMutationOptions<RevealCardsMutation, RevealCardsMutationVariables>;
+export const HideCardsDocument = gql`
+    mutation HideCards($tableId: String!) {
+  hideCards(tableId: $tableId) {
+    revealAt
+  }
+}
+    `;
+export type HideCardsMutationFn = Apollo.MutationFunction<HideCardsMutation, HideCardsMutationVariables>;
+
+/**
+ * __useHideCardsMutation__
+ *
+ * To run a mutation, you first call `useHideCardsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useHideCardsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [hideCardsMutation, { data, loading, error }] = useHideCardsMutation({
+ *   variables: {
+ *      tableId: // value for 'tableId'
+ *   },
+ * });
+ */
+export function useHideCardsMutation(baseOptions?: Apollo.MutationHookOptions<HideCardsMutation, HideCardsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<HideCardsMutation, HideCardsMutationVariables>(HideCardsDocument, options);
+      }
+export type HideCardsMutationHookResult = ReturnType<typeof useHideCardsMutation>;
+export type HideCardsMutationResult = Apollo.MutationResult<HideCardsMutation>;
+export type HideCardsMutationOptions = Apollo.BaseMutationOptions<HideCardsMutation, HideCardsMutationVariables>;
 export const RegisterUserDocument = gql`
     mutation RegisterUser {
   registerUser {
@@ -390,6 +482,7 @@ export const PlayerReadinessDocument = gql`
     query PlayerReadiness($tableId: String!) {
   playerReadiness(tableId: $tableId) {
     isReady
+    chosenCard
     user {
       id
       name
@@ -431,6 +524,7 @@ export const PlayerReadinessUpdatesDocument = gql`
     subscription PlayerReadinessUpdates($tableId: String!) {
   playerReadiness(tableId: $tableId) {
     isReady
+    chosenCard
     user {
       id
       name

@@ -21,22 +21,6 @@ export const PickCard = extendType({
       resolve: async (_parent, args, ctx) => {
         const user = await getUserOrThrow(ctx);
 
-        const oldCard = await ctx.prisma.player.findUnique({
-          where: {
-            tableId_userId: {
-              tableId: args.tableId,
-              userId: user.id,
-            },
-          },
-          select: {
-            chosenCard: true,
-          },
-        });
-
-        if (!oldCard) {
-          throw new Error('Unauthorized');
-        }
-
         const updated = await ctx.prisma.player.update({
           where: {
             tableId_userId: {
@@ -49,17 +33,14 @@ export const PickCard = extendType({
           },
         });
 
-        if (
-          (!oldCard.chosenCard && args.card) ||
-          (oldCard.chosenCard && !args.card)
-        ) {
-          emitPlayerReadinessEvent(ctx, args.tableId, {
-            data: {
+        emitPlayerReadinessEvent(ctx, args.tableId, {
+          data: [
+            {
               isReady: !!args.card,
               user,
             },
-          });
-        }
+          ],
+        });
 
         return { chosenCard: updated.chosenCard };
       },
