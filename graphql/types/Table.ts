@@ -1,4 +1,6 @@
+import { Table as TableSchema, UserProfile } from '@prisma/client';
 import { extendType, nonNull, objectType, stringArg } from 'nexus';
+import { Context } from '../context';
 import { Player } from './Player';
 import { emitPlayerReadinessEvent } from './PlayerReadiness';
 import { getUserOrThrow } from './UserProfile';
@@ -24,6 +26,35 @@ export const Table = objectType({
   },
 });
 
+const translateTable = (table: TableSchema) => ({
+  ...table,
+  revealAt: table.revealAt?.toISOString(),
+});
+
+export const requireUserAtTable = async (
+  ctx: Context,
+  tableId: string
+): Promise<[UserProfile, TableSchema]> => {
+  const user = await getUserOrThrow(ctx);
+
+  const [table] = await ctx.prisma.table.findMany({
+    where: {
+      id: tableId,
+      players: {
+        some: {
+          userId: user.id,
+        },
+      },
+    },
+  });
+
+  if (!table) {
+    throw new Error('Table does not exist or you are not allowed to see it');
+  }
+
+  return [user, table];
+};
+
 export const GetTable = extendType({
   type: 'Query',
   definition(t) {
@@ -33,6 +64,9 @@ export const GetTable = extendType({
         id: nonNull(stringArg()),
       },
       resolve: async (_parent, args, ctx) => {
+        // TODO: uncomment line once we have invite URLs
+        // const table = await requireUserAtTable(ctx, args.id);
+
         const table = await ctx.prisma.table.findUnique({
           where: { id: args.id },
         });
@@ -41,13 +75,15 @@ export const GetTable = extendType({
           throw new Error('Table missing');
         }
 
-        return {
-          ...table,
-          revealAt: table.revealAt?.toISOString(),
-        };
+        return translateTable(table);
       },
     });
   },
+});
+
+export const ShareTable = extendType({
+  type: 'Query',
+  definition(t) {},
 });
 
 /**
@@ -72,10 +108,12 @@ export const JoinTable = extendType({
         });
 
         emitPlayerReadinessEvent(ctx, args.tableId, {
-          data: {
-            isReady: false,
-            user,
-          },
+          data: [
+            {
+              isReady: false,
+              user,
+            },
+          ],
         });
 
         return player;
@@ -107,7 +145,7 @@ export const CreateTable = extendType({
           },
         });
 
-        return { ...table, revealAt: table?.revealAt?.toISOString() };
+        return translateTable(table);
       },
     });
   },
@@ -129,12 +167,116 @@ export const MyTables = extendType({
               },
             },
           },
+          orderBy: {
+            updatedAt: 'desc',
+          },
         });
 
-        return tables.map((table) => ({
-          ...table,
-          revealAt: table?.revealAt?.toISOString(),
-        }));
+        return tables.map((table) => translateTable(table));
+      },
+    });
+  },
+});
+
+export const RevealCards = extendType({
+  type: 'Mutation',
+  definition(t) {
+    t.nonNull.field('revealCards', {
+      type: Table,
+      args: {
+        tableId: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        const [, table] = await requireUserAtTable(ctx, args.tableId);
+
+        if (table.revealAt) {
+          throw new Error(
+            `Cards are already set to be revealed at ${table.revealAt.toISOString()}`
+          );
+        }
+
+        const revealAt = new Date();
+        revealAt.setSeconds(revealAt.getSeconds() + 5);
+
+        const updatedTable = await ctx.prisma.table.update({
+          where: {
+            id: args.tableId,
+          },
+          data: {
+            revealAt,
+          },
+        });
+
+        setTimeout(async () => {
+          const players = await ctx.prisma.player.findMany({
+            where: {
+              tableId: args.tableId,
+            },
+            include: {
+              userProfile: true,
+            },
+          });
+
+          emitPlayerReadinessEvent(ctx, args.tableId, {
+            data: players.map((p) => ({
+              isReady: !!p.chosenCard,
+              chosenCard: p.chosenCard || undefined,
+              user: p.userProfile,
+            })),
+          });
+        }, 5000);
+
+        return translateTable(updatedTable);
+      },
+    });
+  },
+});
+
+export const HideCards = extendType({
+  type: 'Mutation',
+  definition(t) {
+    t.nonNull.field('hideCards', {
+      type: Table,
+      args: {
+        tableId: nonNull(stringArg()),
+      },
+      resolve: async (_parent, args, ctx) => {
+        await requireUserAtTable(ctx, args.tableId);
+
+        const table = await ctx.prisma.table.update({
+          where: {
+            id: args.tableId,
+          },
+          data: {
+            revealAt: null,
+          },
+        });
+        await ctx.prisma.player.updateMany({
+          where: {
+            tableId: args.tableId,
+          },
+          data: {
+            chosenCard: null,
+          },
+        });
+
+        const players = await ctx.prisma.player.findMany({
+          where: {
+            tableId: args.tableId,
+          },
+          include: {
+            userProfile: true,
+          },
+        });
+
+        emitPlayerReadinessEvent(ctx, args.tableId, {
+          data: players.map((p) => ({
+            isReady: false,
+            user: p.userProfile,
+          })),
+        });
+
+        return translateTable(table);
       },
     });
   },

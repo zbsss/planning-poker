@@ -9,8 +9,10 @@ type Card {
 type Mutation {
   chooseCard(card: String, tableId: String!): Card!
   createTable(name: String!): Table!
+  hideCards(tableId: String!): Table!
   joinTable(tableId: String!): Player!
   registerUser: UserProfile!
+  revealCards(tableId: String!): Table!
 }
 
 type Player {
@@ -33,6 +35,7 @@ type Query {
 }
 
 type Readiness {
+  chosenCard: String
   isReady: Boolean!
   user: UserProfile!
 }

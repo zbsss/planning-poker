@@ -38,15 +38,7 @@ const link =
 const apolloClient = new ApolloClient({
   link,
   uri: '/api/graphql',
-  cache: new InMemoryCache({
-    typePolicies: {
-      Query: {
-        fields: {
-          links: relayStylePagination(),
-        },
-      },
-    },
-  }),
+  cache: new InMemoryCache(),
 });
 
 export default apolloClient;

@@ -28,7 +28,6 @@ mutation CreateTable($name: String!) {
     players {
       role
       userProfile {
-        id
         name
         image
         email
@@ -49,6 +48,18 @@ mutation ChooseCard($tableId: String!, $card: String) {
   }
 }
 
+mutation RevealCards($tableId: String!) {
+  revealCards(tableId: $tableId) {
+    revealAt
+  }
+}
+
+mutation HideCards($tableId: String!) {
+  hideCards(tableId: $tableId) {
+    revealAt
+  }
+}
+
 mutation RegisterUser {
   registerUser {
     id
@@ -61,6 +72,7 @@ mutation RegisterUser {
 query PlayerReadiness($tableId: String!) {
   playerReadiness(tableId: $tableId) {
     isReady
+    chosenCard
     user {
       id
       name
@@ -73,6 +85,7 @@ query PlayerReadiness($tableId: String!) {
 subscription PlayerReadinessUpdates($tableId: String!) {
   playerReadiness(tableId: $tableId) {
     isReady
+    chosenCard
     user {
       id
       name

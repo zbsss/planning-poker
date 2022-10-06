@@ -54,6 +54,7 @@ export interface NexusGenObjects {
   }
   Query: {};
   Readiness: { // root type
+    chosenCard?: string | null; // String
     isReady: boolean; // Boolean!
     user: NexusGenRootTypes['UserProfile']; // UserProfile!
   }
@@ -88,8 +89,10 @@ export interface NexusGenFieldTypes {
   Mutation: { // field return type
     chooseCard: NexusGenRootTypes['Card']; // Card!
     createTable: NexusGenRootTypes['Table']; // Table!
+    hideCards: NexusGenRootTypes['Table']; // Table!
     joinTable: NexusGenRootTypes['Player']; // Player!
     registerUser: NexusGenRootTypes['UserProfile']; // UserProfile!
+    revealCards: NexusGenRootTypes['Table']; // Table!
   }
   Player: { // field return type
     chosenCard: string | null; // String
@@ -104,6 +107,7 @@ export interface NexusGenFieldTypes {
     tables: NexusGenRootTypes['Table'][]; // [Table!]!
   }
   Readiness: { // field return type
+    chosenCard: string | null; // String
     isReady: boolean; // Boolean!
     user: NexusGenRootTypes['UserProfile']; // UserProfile!
   }
@@ -131,8 +135,10 @@ export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
     chooseCard: 'Card'
     createTable: 'Table'
+    hideCards: 'Table'
     joinTable: 'Player'
     registerUser: 'UserProfile'
+    revealCards: 'Table'
   }
   Player: { // field return type name
     chosenCard: 'String'
@@ -147,6 +153,7 @@ export interface NexusGenFieldTypeNames {
     tables: 'Table'
   }
   Readiness: { // field return type name
+    chosenCard: 'String'
     isReady: 'Boolean'
     user: 'UserProfile'
   }
@@ -176,7 +183,13 @@ export interface NexusGenArgTypes {
     createTable: { // args
       name: string; // String!
     }
+    hideCards: { // args
+      tableId: string; // String!
+    }
     joinTable: { // args
+      tableId: string; // String!
+    }
+    revealCards: { // args
       tableId: string; // String!
     }
   }

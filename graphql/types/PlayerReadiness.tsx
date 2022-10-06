@@ -1,5 +1,5 @@
 import { objectType, extendType, nonNull, stringArg } from 'nexus';
-import { requireUserLoggedIn, UserProfile } from './UserProfile';
+import { getUserOrThrow, UserProfile } from './UserProfile';
 import { Event } from '../../lib/pubsub';
 import { Context } from '../context';
 import { UserProfile as User } from '@prisma/client';
@@ -8,6 +8,7 @@ export const Readiness = objectType({
   name: 'Readiness',
   definition(t) {
     t.nonNull.boolean('isReady');
+    t.string('chosenCard');
     t.nonNull.field('user', {
       type: UserProfile,
     });
@@ -16,6 +17,7 @@ export const Readiness = objectType({
 
 interface Readiness {
   isReady: boolean;
+  chosenCard?: string;
   user: User;
 }
 
@@ -25,7 +27,7 @@ export const playerReadinessTopic = (tableId: string) =>
 export const emitPlayerReadinessEvent = async (
   ctx: Context,
   tableId: string,
-  event: Event<Readiness>
+  event: Event<Readiness[]>
 ) => {
   await ctx.pubsub.publish(playerReadinessTopic(tableId), event);
 };
@@ -39,20 +41,33 @@ export const PlayerReadiness = extendType({
         tableId: nonNull(stringArg()),
       },
       resolve: async (_parent, args, ctx) => {
-        requireUserLoggedIn(ctx);
+        const user = await getUserOrThrow(ctx);
 
-        const players = await ctx.prisma.player.findMany({
-          where: { tableId: args.tableId },
-          select: {
-            userProfile: true,
-            chosenCard: true,
+        const table = await ctx.prisma.table.findUniqueOrThrow({
+          where: { id: args.tableId },
+          include: {
+            players: {
+              include: {
+                userProfile: {},
+              },
+            },
           },
         });
 
-        return players.map((player) => ({
+        const now = new Date();
+
+        const result = table.players.map((player) => ({
           isReady: !!player.chosenCard,
+          chosenCard:
+            player.userId === user.id
+              ? player.chosenCard
+              : table.revealAt && table.revealAt < now
+              ? player.chosenCard
+              : undefined,
           user: player.userProfile,
         }));
+
+        return result;
       },
     });
   },
@@ -69,9 +84,9 @@ export const PlayerReadinessUpdates = extendType({
       subscribe(_parent, args, ctx) {
         return ctx.pubsub.asyncIterator(playerReadinessTopic(args.tableId));
       },
-      async resolve(eventPromise: Promise<Event<Readiness>>) {
+      async resolve(eventPromise: Promise<Event<Readiness[]>>, args, ctx) {
         const { data } = await eventPromise;
-        return [data];
+        return data;
       },
     });
   },
