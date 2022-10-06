@@ -3,11 +3,11 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 import {
   useTableQuery,
   useChooseCardMutation,
-  useJoinTableMutation,
   usePlayerReadinessQuery,
   PlayerReadinessUpdatesDocument,
   useRevealCardsMutation,
   useHideCardsMutation,
+  useShareUrlQuery,
 } from '../../generated/graphql';
 import Avatar from '../../components/Avatar';
 
@@ -24,14 +24,17 @@ const Table: FC<TableProps> = ({ tableId }) => {
     },
   });
 
+  const { data: shareUrl } = useShareUrlQuery({
+    variables: {
+      tableId,
+    },
+  });
+
   const [chooseCard] = useChooseCardMutation();
   const [revealCards] = useRevealCardsMutation({
     variables: { tableId },
   });
   const [hideCards] = useHideCardsMutation({
-    variables: { tableId },
-  });
-  const [joinTable] = useJoinTableMutation({
     variables: { tableId },
   });
 
@@ -104,6 +107,9 @@ const Table: FC<TableProps> = ({ tableId }) => {
   if (error) return <>Error: {JSON.stringify(error)}</>;
   return (
     <>
+      <div>
+        <pre>{JSON.stringify(shareUrl?.share, null, 2)}</pre>
+      </div>
       <div className="flex justify-center space-x-4 mb-5">
         <h1 className="text-center text-2xl my-3">{data?.table.name}</h1>
         {isEveryoneReady && !areCardsRevealed && (
@@ -183,14 +189,6 @@ const Table: FC<TableProps> = ({ tableId }) => {
               {card}
             </button>
           ))}
-        {!isUserPlaying && (
-          <button
-            className="inline-flex items-center bg-gray-100 border-0 py-1 px-3 focus:outline-none hover:bg-gray-200 rounded text-base mt-4 md:mt-0"
-            onClick={() => joinTable()}
-          >
-            Join Table
-          </button>
-        )}
       </div>
     </>
   );

@@ -84,7 +84,7 @@ export const PlayerReadinessUpdates = extendType({
       subscribe(_parent, args, ctx) {
         return ctx.pubsub.asyncIterator(playerReadinessTopic(args.tableId));
       },
-      async resolve(eventPromise: Promise<Event<Readiness[]>>, args, ctx) {
+      async resolve(eventPromise: Promise<Event<Readiness[]>>) {
         const { data } = await eventPromise;
         return data;
       },

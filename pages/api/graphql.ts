@@ -86,12 +86,6 @@ const handler = async (req: MicroRequest, res: ServerResponse) => {
   await apolloServerHandler(req, res);
 };
 
-const cors = Cors({
-  // allowCredentials: 'include' as any,
-  // allowHeaders: ['Access-Control-Allow-Origin'],
-  // origin: 'https://studio.apollographql.com',
-  // origin: 'https://studio.apollographql.com,http://localhost:3000',
-  // origin: ['https://studio.apollographql.com', 'http://localhost:3000'] as any,
-});
+const cors = Cors();
 
 export default cors(handler);

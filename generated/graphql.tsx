@@ -25,7 +25,7 @@ export type Mutation = {
   chooseCard: Card;
   createTable: Table;
   hideCards: Table;
-  joinTable: Player;
+  joinTable: Url;
   registerUser: UserProfile;
   revealCards: Table;
 };
@@ -48,7 +48,7 @@ export type MutationHideCardsArgs = {
 
 
 export type MutationJoinTableArgs = {
-  tableId: Scalars['String'];
+  token: Scalars['String'];
 };
 
 
@@ -73,12 +73,18 @@ export enum PlayerRole {
 export type Query = {
   __typename?: 'Query';
   playerReadiness: Array<Readiness>;
+  share: Url;
   table: Table;
   tables: Array<Table>;
 };
 
 
 export type QueryPlayerReadinessArgs = {
+  tableId: Scalars['String'];
+};
+
+
+export type QueryShareArgs = {
   tableId: Scalars['String'];
 };
 
@@ -112,6 +118,11 @@ export type Table = {
   revealAt?: Maybe<Scalars['String']>;
 };
 
+export type Url = {
+  __typename?: 'Url';
+  url: Scalars['String'];
+};
+
 export type UserProfile = {
   __typename?: 'UserProfile';
   email: Scalars['String'];
@@ -140,11 +151,11 @@ export type CreateTableMutationVariables = Exact<{
 export type CreateTableMutation = { __typename?: 'Mutation', createTable: { __typename?: 'Table', id: string, name: string, players: Array<{ __typename?: 'Player', role: PlayerRole, userProfile: { __typename?: 'UserProfile', name: string, image?: string | null, email: string } }> } };
 
 export type JoinTableMutationVariables = Exact<{
-  tableId: Scalars['String'];
+  token: Scalars['String'];
 }>;
 
 
-export type JoinTableMutation = { __typename?: 'Mutation', joinTable: { __typename?: 'Player', role: PlayerRole } };
+export type JoinTableMutation = { __typename?: 'Mutation', joinTable: { __typename?: 'Url', url: string } };
 
 export type ChooseCardMutationVariables = Exact<{
   tableId: Scalars['String'];
@@ -186,6 +197,13 @@ export type PlayerReadinessUpdatesSubscriptionVariables = Exact<{
 
 
 export type PlayerReadinessUpdatesSubscription = { __typename?: 'Subscription', playerReadiness: Array<{ __typename?: 'Readiness', isReady: boolean, chosenCard?: string | null, user: { __typename?: 'UserProfile', id: string, name: string, email: string, image?: string | null } }> };
+
+export type ShareUrlQueryVariables = Exact<{
+  tableId: Scalars['String'];
+}>;
+
+
+export type ShareUrlQuery = { __typename?: 'Query', share: { __typename?: 'Url', url: string } };
 
 
 export const TableDocument = gql`
@@ -311,9 +329,9 @@ export type CreateTableMutationHookResult = ReturnType<typeof useCreateTableMuta
 export type CreateTableMutationResult = Apollo.MutationResult<CreateTableMutation>;
 export type CreateTableMutationOptions = Apollo.BaseMutationOptions<CreateTableMutation, CreateTableMutationVariables>;
 export const JoinTableDocument = gql`
-    mutation JoinTable($tableId: String!) {
-  joinTable(tableId: $tableId) {
-    role
+    mutation JoinTable($token: String!) {
+  joinTable(token: $token) {
+    url
   }
 }
     `;
@@ -332,7 +350,7 @@ export type JoinTableMutationFn = Apollo.MutationFunction<JoinTableMutation, Joi
  * @example
  * const [joinTableMutation, { data, loading, error }] = useJoinTableMutation({
  *   variables: {
- *      tableId: // value for 'tableId'
+ *      token: // value for 'token'
  *   },
  * });
  */
@@ -557,3 +575,38 @@ export function usePlayerReadinessUpdatesSubscription(baseOptions: Apollo.Subscr
       }
 export type PlayerReadinessUpdatesSubscriptionHookResult = ReturnType<typeof usePlayerReadinessUpdatesSubscription>;
 export type PlayerReadinessUpdatesSubscriptionResult = Apollo.SubscriptionResult<PlayerReadinessUpdatesSubscription>;
+export const ShareUrlDocument = gql`
+    query ShareUrl($tableId: String!) {
+  share(tableId: $tableId) {
+    url
+  }
+}
+    `;
+
+/**
+ * __useShareUrlQuery__
+ *
+ * To run a query within a React component, call `useShareUrlQuery` and pass it any options that fit your needs.
+ * When your component renders, `useShareUrlQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useShareUrlQuery({
+ *   variables: {
+ *      tableId: // value for 'tableId'
+ *   },
+ * });
+ */
+export function useShareUrlQuery(baseOptions: Apollo.QueryHookOptions<ShareUrlQuery, ShareUrlQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ShareUrlQuery, ShareUrlQueryVariables>(ShareUrlDocument, options);
+      }
+export function useShareUrlLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ShareUrlQuery, ShareUrlQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ShareUrlQuery, ShareUrlQueryVariables>(ShareUrlDocument, options);
+        }
+export type ShareUrlQueryHookResult = ReturnType<typeof useShareUrlQuery>;
+export type ShareUrlLazyQueryHookResult = ReturnType<typeof useShareUrlLazyQuery>;
+export type ShareUrlQueryResult = Apollo.QueryResult<ShareUrlQuery, ShareUrlQueryVariables>;
